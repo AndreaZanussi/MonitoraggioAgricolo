@@ -21,7 +21,7 @@ int valid_n() {
 	int n = 0;
 	cout << "How many bots do you want to add? ";
 	cin >> n;
-	if ( (n <= 0) || (n > 100) ){
+	if ( (n <= 0) || (n > 50) ){
 		cerr << "Error: invalid number" << endl;
 		clearIN();
 		return 0;
@@ -31,12 +31,12 @@ int valid_n() {
 
 void adding_rover(std::vector<Bot>& bots) {
 	int n_bot = valid_n();
-	Bot::add_rover(n_bot, bots);
+	Bot::add_bot(n_bot, Bot::Type::Rover, bots);
 };
 
 void adding_drone(std::vector<Bot>& bots) {
 	int n_bot = valid_n();
-	Bot::add_drone(n_bot, bots);
+	Bot::add_bot(n_bot, Bot::Type::Drone, bots);
 };
 
 void show_bots(std::vector<Bot>& bots) {
@@ -47,9 +47,9 @@ void show_bots(std::vector<Bot>& bots) {
 
 void menu(std::vector<Bot>& bots) {
 
-	cout << "Do you want to add:\n";
-	cout << "1 - Rover\n";
-	cout << "2 - Drone\n";
+	cout << "What would you like to do:\n";
+	cout << "1 - Add Rover(s)\n";
+	cout << "2 - Add Drone(s)\n";
 	cout << "3 - Show how many bots are presents\n";
 	cout << "4 - Show specific bot\n";
 	cout << "5 - Exit\n";
@@ -76,12 +76,12 @@ void menu(std::vector<Bot>& bots) {
 		cin >> id;
 		
 		if (bots.empty()) {
-			cerr << "Error: no bots in the system!" << endl;
+			cerr << "Error: no bots in the system!\n" << endl;
 			clearIN();
 			menu(bots);
 		}
 		else if (id < 0 || id >= bots.size()) {
-			cerr << "Error: invalid ID! Please enter a valid option (0-" << bots.size() << ")" << endl;
+			cerr << "Error: invalid ID! Please enter a valid option (0-" << bots.size() << ")\n" << endl;
 			clearIN();
 			menu(bots);
 		}
