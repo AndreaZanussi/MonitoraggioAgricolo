@@ -5,6 +5,31 @@ using std::string;
 
 #include <iostream>
 
+struct AgriCell {
+	int hum_Field;
+	int hum_Air;
+	int tempCell;
+	bool plantHealth_Field;
+	bool plantHealth_Air;
+
+	AgriCell(int hum_Field, int hum_Air, int tempCell, bool plantHealth_Field, bool plantHealth_Air);
+};
+
+
+/*
+typedef AgriCell T;
+
+class FieldMatrix {
+public:
+
+private:
+	int rows_;
+	int cols_;
+	T * matrix_;
+
+};
+*/
+
 class Bot{
 public:
 	enum class Status {
@@ -19,6 +44,8 @@ public:
 	Bot(int id, Type type);
 
 	static void add_bot(int n, Type type, std::vector<Bot>& bots);
+	void set_status(Status ActualStatus);
+	void move_to();
 
 	int id()			const;
 	Type type()			const;
@@ -32,12 +59,6 @@ private:
 	int		id_;
 	Type	type_;
 	Status	status_;
-	bool	active_;
-	bool	moving_;
-	bool	measuring_;
-	bool	homing_;
-	bool	error_;
-
 	int		batteryLevel_;
 	int		humidity_;		//Rover: hum suolo; Drone: hum aria
 	int		temperature_;
@@ -48,7 +69,7 @@ private:
 
 };
 
-//operators
+//Operatori
 ostream& operator<<(ostream& os, const Bot& bot);
 
 

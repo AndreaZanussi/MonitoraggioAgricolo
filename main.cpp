@@ -12,7 +12,7 @@ using std::cin;
 using std::cerr;
 using std::endl;
 
-void clearIN() {
+void clear_in() {
 	cin.clear();
 	cin.ignore(1000, '\n');
 };
@@ -23,7 +23,7 @@ int valid_n() {
 	cin >> n;
 	if ( (n <= 0) || (n > 50) ){
 		cerr << "Error: invalid number" << endl;
-		clearIN();
+		clear_in();
 		return 0;
 	}
 	return n;
@@ -47,58 +47,71 @@ void show_bots(std::vector<Bot>& bots) {
 
 void menu(std::vector<Bot>& bots) {
 
-	cout << "What would you like to do:\n";
-	cout << "1 - Add Rover(s)\n";
-	cout << "2 - Add Drone(s)\n";
-	cout << "3 - Show how many bots are presents\n";
-	cout << "4 - Show specific bot\n";
-	cout << "5 - Exit\n";
-
 	int choice = 0;
-	cin >> choice;
 
-	switch (choice) {
-	case 1:
-		adding_rover(bots);
-		menu(bots);
-		break;
-	case 2:
-		adding_drone(bots);
-		menu(bots);
-		break;
-	case 3:
-		show_bots(bots);
-		menu(bots);
-		break;
-	case 4:
-		int id;
-		cout << "Insert the ID of the bot you want to show: ";
-		cin >> id;
-		
-		if (bots.empty()) {
-			cerr << "Error: no bots in the system!\n" << endl;
-			clearIN();
-			menu(bots);
+	do {
+		cout << "Please select an option:\n";
+		cout << "1 - Add Rover(s)\n";
+		cout << "2 - Add Drone(s)\n";
+		cout << "3 - Show how many bots are presents\n";
+		cout << "4 - Show specific bot\n";
+		cout << "5 - Exit\n";
+
+		cin >> choice;
+
+		if (cin.fail()) {
+			clear_in();
+			cerr << "Error: invalid choise! Please enter a valid option (1-5).\n" << endl;
+			continue;
 		}
-		else if (id < 0 || id >= bots.size()) {
-			cerr << "Error: invalid ID! Please enter a valid option (0-" << bots.size() << ")\n" << endl;
-			clearIN();
-			menu(bots);
+
+
+		switch (choice) {
+		case 1:
+			adding_rover(bots);
+			break;
+		case 2:
+			adding_drone(bots);
+			break;
+		case 3:
+			show_bots(bots);
+			break;
+		case 4:
+			int id;
+			if (bots.empty()) {
+				cerr << "Error: no bots in the system!\n" << endl;
+				clear_in();
+				continue;
+			}
+			else {
+				cout << "Insert the ID of the bot you want to show: ";
+				cin >> id;			
+			}
+			if (cin.fail()) {
+				cerr << "Error: invalid ID! Please enter a valid option (0-" << bots.size() - 1 << ")\n" << endl;
+				clear_in();
+				continue;
+			}
+			//Per evitare di accedere ad elementi fuori al vettore con un conseguente errore del programma
+			else if (id < 0 || id > (bots.size() - 1)) {
+				cerr << "Error: invalid ID! Please enter a valid option (0-" << bots.size() - 1 << ")\n" << endl;
+				clear_in();
+				continue;
+			}
+			else {
+				cout << bots[id] << endl;
+			}
+			break;
+		case 5:
+			break;
+		default:
+			clear_in();
+			cerr << "Error: invalid choise! Please enter a valid option (1-5).\n" << endl;
+			break;
 		}
-		else {
-			cout << bots[id] << endl;
-			menu(bots);
-		}
-		break;
-	case 5:
-		cout << "Ending..." << endl;
-		break;
-	default:
-		clearIN();
-		cerr << "Error: invalid choise! Please enter a valid option (1-5).\n" << endl;
-		menu(bots);
-		break;
 	}
+	while (choice != 5);
+	cout << "Ending..." << endl;
 }
 
 int main()
@@ -108,10 +121,11 @@ int main()
 		 << "//////////////////////////////////////////////\n"
 		 << endl;
 
-	std::vector<Bot> bots;				//vettore di memoria delle unità  
-	menu(bots);							//interfaccia gestione bots
+	std::vector<Bot> bots;				//Vettore di memoria delle unità 
+	menu(bots);							//Interfaccia gestione bots
     cout << "END OF PROGRAM" << endl;
-    //cin.ignore();
+	cin.ignore();
+	cin.get();
     return 0;
 }
 
