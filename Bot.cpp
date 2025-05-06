@@ -9,18 +9,24 @@ using std::cout;
 #include "Bot.h"
 
 
-
-//Costruttore di default
+//Costruttori di default
 Bot::Bot() {}
+AgriField::AgriField() {}
 
-AgriCell::AgriCell(int hum_Field, int hum_Air, int tempCell, bool plantHealth_Field, bool plantHealth_Air)
-	: hum_Field{ hum_Field }, hum_Air{ hum_Air }, tempCell{ tempCell }, plantHealth_Field{ plantHealth_Field }, plantHealth_Air{ plantHealth_Air } {
-}
-
-//Costruttore con parametri di default
+//Costruttori con parametri di default
 Bot::Bot(int id, Type type)
     : id_{ id }, type_{ type }, status_{ Status::Active }, batteryLevel_{ 100 }, humidity_{ 0 }, temperature_{ 0 }, plantHealth_{ true } {
     
+}
+
+AgriCell::AgriCell(int hum_Field, int hum_Air, int tempCell, bool plantHealth_Field, bool plantHealth_Air)
+		: hum_Field{ hum_Field }, hum_Air{ hum_Air }, tempCell{ tempCell }, plantHealth_Field{ plantHealth_Field }, plantHealth_Air{ plantHealth_Air } {
+
+}
+
+AgriField::AgriField(int rows, int cols)
+		: rows_{ rows }, cols_{ cols }, field_(rows, std::vector<AgriCell>(cols, AgriCell(50, 50, 20, true, true))) {
+
 }
 
 int Bot::currentID_ = 0;
@@ -54,6 +60,22 @@ bool Bot::plantHealth() const {
 	return plantHealth_;
 }
 
+
+void AgriField::showField() const {
+	for (int i = 0; i < rows_; ++i) {
+		for (int j = 0; j < cols_; ++j) {
+			cout << "Cell (" << i << ", " << j << "): "
+				<< "Humidity Field: " << field_[i][j].hum_Field << "%, "
+				<< "Humidity Air: " << field_[i][j].hum_Air << "%, "
+				<< "Temperature: " << field_[i][j].tempCell << "*C, "
+				<< "Plant Health Field: " << (field_[i][j].plantHealth_Field ? "Healthy" : "Unhealthy") << ", "
+				<< "Plant Health Air: " << (field_[i][j].plantHealth_Air ? "Healthy" : "Unhealthy") << "\n";
+		}
+		cout << endl;
+	}
+
+}
+
 //Aggiunta di membri
 void Bot::add_bot(int n, Type type, std::vector<Bot>& bots) {
     for (int i = 0; i < n; ++i) {
@@ -63,19 +85,21 @@ void Bot::add_bot(int n, Type type, std::vector<Bot>& bots) {
     cout << "\n" << endl;
 }
 
-void Bot::set_status(Status ActualStatus) {
+//Gestione dello stato dei bot in base alle attività in corso
+void Bot::set_status(Status ActualStatus, int index) {
 
 	if (ActualStatus == Status::Active) {
 	}
 	else if (ActualStatus == Status::Error) {
+		cerr << "Bot ID " << index << " encountered an error." << endl;
 	}
 	else if (ActualStatus == Status::Homing) {
-		if (batteryLevel_ < 5) {
+		if (batteryLevel_ < 10) {
 			cerr << "Error: Battery level too low to return home." << endl;
 			status_ = Status::Error;
 			return;
 		}
-		batteryLevel_ -= 5; // Simulate battery consumption
+		batteryLevel_ -= 10; // Simulate battery consumption
 	}
     else if (ActualStatus == Status::Moving) {
 		if (batteryLevel_ <= 20) {
@@ -83,7 +107,7 @@ void Bot::set_status(Status ActualStatus) {
 			status_ = Status::Homing;
 			return;
 		}
-		batteryLevel_ -= 5; //Consumo batteria
+		batteryLevel_ -= 10; //Consumo batteria
 	}
 	else if (ActualStatus == Status::Measuring) {
 		if (batteryLevel_ <= 15) {
@@ -91,7 +115,7 @@ void Bot::set_status(Status ActualStatus) {
 			status_ = Status::Homing;
 			return;
 		}
-		batteryLevel_ -= 5; // Simulate battery consumption
+		batteryLevel_ -= 10; // Simulate battery consumption
 	}	
 	status_ = ActualStatus;
 }

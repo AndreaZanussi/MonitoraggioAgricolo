@@ -13,22 +13,31 @@ struct AgriCell {
 	bool plantHealth_Air;
 
 	AgriCell(int hum_Field, int hum_Air, int tempCell, bool plantHealth_Field, bool plantHealth_Air);
+	AgriCell() : hum_Field{ 0 }, hum_Air{ 0 }, tempCell{ 0 }, plantHealth_Field{ true }, plantHealth_Air{ true } { }
 };
 
 
-/*
-typedef AgriCell T;
 
-class FieldMatrix {
+class AgriField {
 public:
+
+	AgriField();
+	AgriField(int rows, int cols);
+	
+
+	AgriCell& getCell(int row, int col);
+	void showField() const;
+
+	int rows() const;
+	int cols() const;
 
 private:
 	int rows_;
 	int cols_;
-	T * matrix_;
+	std::vector<std::vector<AgriCell>> field_;
 
 };
-*/
+
 
 class Bot{
 public:
@@ -44,7 +53,7 @@ public:
 	Bot(int id, Type type);
 
 	static void add_bot(int n, Type type, std::vector<Bot>& bots);
-	void set_status(Status ActualStatus);
+	void set_status(Status ActualStatus, int index);
 	void move_to();
 
 	int id()			const;
