@@ -11,10 +11,31 @@ using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
+using std::pair;
+
+const int MAX_ROWS = 10;
+const int MAX_COLS = 10;
 
 void clear_in() {
 	cin.clear();
 	cin.ignore(1000, '\n');
+};
+
+pair<int, int> valid_field() {
+	int rows = 0, cols = 0;
+	cout << "Set the field measure LxW [m^2]:" << endl;
+
+	while (true) {
+		cin >> rows >> cols;
+		if ((cin.fail()) || (rows <= 0) || (cols <= 0) || (rows > MAX_ROWS) || (cols > MAX_COLS)) {
+			cerr << "Error: invalid field size or too big!\n" << endl;
+			clear_in();
+		}
+		else {
+			return {rows, cols};
+			break;
+		}
+	}
 };
 
 int valid_n() {
@@ -22,7 +43,7 @@ int valid_n() {
 	cout << "How many bots do you want to add? ";
 	cin >> n;
 	if ( (n <= 0) || (n > 50) ){
-		cerr << "Error: invalid number or number too high" << endl;
+		cerr << "Error: invalid number or too high" << endl;
 		clear_in();
 		return 0;
 	}
@@ -56,73 +77,37 @@ int valid_id(int size) {
 	}
 };
 
-void checking_all_status(std::vector<Bot>& bots) {
-	for (int i = 0; i < bots.size(); i++) {
-		if (bots[i].status() == Bot::Status::Error) {
-			cout << "Bot " << bots[i].id() << " is damaged!\n" << endl;
-		}
-		else if (bots[i].status() == Bot::Status::Active) {
-			cout << "Bot " << bots[i].id() << " is active.\n" << endl;
-		}
-		else if (bots[i].status() == Bot::Status::Moving) {
-			cout << "Bot " << bots[i].id() << " is moving.\n" << endl;
-		}
-		else if (bots[i].status() == Bot::Status::Measuring) {
-			cout << "Bot " << bots[i].id() << " is measuring.\n" << endl;
-		}
-		else if (bots[i].status() == Bot::Status::Homing) {
-			cout << "Bot " << bots[i].id() << " is homing.\n" << endl;
-		}
-	}
-};
-
-bool check_status(int id, std::vector<Bot>& bots) {
-
-	if (bots[id].status() != Bot::Status::Active) {
-		return false;
-	}
-	else {
-		return true;
-	}
-};
-
-void adding_rover(std::vector<Bot>& bots) {
+void adding_rover(vector<Bot>& bots) {
 	int n_bot = valid_n();
 	Bot::add_bot(n_bot, Bot::Type::Rover, bots);
 };
 
-void adding_drone(std::vector<Bot>& bots) {
+void adding_drone(vector<Bot>& bots) {
 	int n_bot = valid_n();
 	Bot::add_bot(n_bot, Bot::Type::Drone, bots);
 };
 
-void show_bots(std::vector<Bot>& bots) {
-
-	cout << "Actually there are " << bots.size() << " bots in the system.\n" << endl;
-
-};
-
-void menu(std::vector<Bot>& bots) {
+void menu(vector<Bot>& bots, AgriField& field) {
 
 	int choice = 0;
 	int id;
 
 	do {
-		cout << "Please select an option:\n";
-		cout << "1 - Exit\n";
-		cout << "2 - Add Rover(s)\n";
-		cout << "3 - Add Drone(s)\n";
-		cout << "4 - Show how many bots are presents\n";
-		cout << "5 - Show all bots status\n";
-		cout << "6 - Show a specific bot legend\n";
-		cout << "7 - Send a bot to a specific position\n";
-		cout << "Insert your choice: ";
+		cout << "Please select an option:\n"
+			<< "1 - Exit\n"
+			<< "2 - Add Rover(s)\n"
+			<< "3 - Add Drone(s)\n"
+			<< "4 - Show how many bots are presents\n"
+			<< "5 - Show all bots status\n"
+			<< "6 - Show a specific bot legend\n"
+			<< "7 - Send a bot to a specific position\n"
+			<< "Insert your choice: " << endl;
 
 		cin >> choice;
 
 		if (cin.fail()) {
 			clear_in();
-			cerr << "Error: invalid choise! Please enter a valid option (1-5).\n" << endl;
+			cerr << "Error: invalid choise! Please enter a valid option (1-7).\n" << endl;
 			continue;
 		}
 
@@ -136,7 +121,7 @@ void menu(std::vector<Bot>& bots) {
 			adding_drone(bots);
 			break;
 		case 4:
-			show_bots(bots);
+			cout << "Actually there are " << bots.size() << " bots in the system.\n" << endl;
 			break;
 		case 5:
 			if (bots.size() == 0) {
@@ -144,10 +129,9 @@ void menu(std::vector<Bot>& bots) {
 				break;
 			}
 			else {
-				checking_all_status(bots);
+				bots[0].check_all_status(bots);
 				break;
 			}
-			break;
 		case 6:
 			id = valid_id(static_cast<int>(bots.size()));
 			if (id == -1) {
@@ -163,21 +147,9 @@ void menu(std::vector<Bot>& bots) {
 				break;
 			}
 			else {
-				bool available = check_status(id, bots);
+				bool available = bots[id].check_is_available();
 				if (available == true) {
-					cout << "Insert the coordinates of the position: ";
-					int r = 0, c = 0;
-					cin >> r >> c;
-					if (cin.fail()) {
-						cerr << "Error: invalid coordinates!\n" << endl;
-						clear_in();
-						continue;
-					}
-					else {
-						bots[id].move_to();
-						bots[id].set_status(Bot::Status::Moving, id);
-						cout << "Bot " << bots[id].id() << " is moving to position (" << r << ", " << c << ").\n" << endl;
-					}
+					bots[id].move_to_cell(field, bots);
 				}
 				else {
 					cerr << "Error: bot is not available!\n" << endl;
@@ -201,8 +173,12 @@ int main()
 		 << "//////////////////////////////////////////////\n"
 		 << endl;
 
-	std::vector<Bot> bots;				//Vettore di memoria delle unità 
-	menu(bots);							//Interfaccia gestione bots
+	//Creazione del campo di lavoro
+	pair<int, int> dimensions = valid_field();
+ 	AgriField field(dimensions.first, dimensions.second);
+	vector<Bot> bots;							//Vettore di memoria delle unità 
+
+	menu(bots, field);							//Interfaccia gestione bots
     cout << "END OF PROGRAM" << endl;
 	cin.ignore();
 	cin.get();
